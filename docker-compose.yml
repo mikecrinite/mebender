@@ -1,0 +1,18 @@
+version: "3.4"
+services:
+  mebender:
+    container_name: mebender
+    image: mebender
+    restart: unless-stopped
+    # environment:
+    #   - AUTH_USER=${AUTH_USER}
+    #   - AUTH_PASS=${AUTH_PASS}
+    #   - PORT=${PORT}
+    ports:
+      # - ${PORT}:${PORT}
+      - 8080:8080
+    volumes:
+      - ./resources/:/root/resources/ # "connect" to the sqlite database
+
+    
+    

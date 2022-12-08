@@ -3,9 +3,10 @@ package web
 import (
 	"net/http"
 	"encoding/json"
-	//"log"
+	"log"
 	"fmt"
 	"mebender/model"
+	"mebender/service"
 )
 
 func CutVideo (w http.ResponseWriter, r *http.Request) {
@@ -29,6 +30,11 @@ func CutVideo (w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			handleFailure(err, w, request)
 		}
+
+		stdout, stderr, err := service.CutVideo(request)
+		log.Println(stdout)
+		log.Println(stderr)
+		log.Println(err)
 
 		// Handle Success
 		////w.Header().Set("Content-Type", "application/json") 

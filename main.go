@@ -5,13 +5,15 @@ import (
 	//"fmt"
 	"net/http"
 
-	"mebender/web"
+	"mebender/api"
 )
 
-func main(){
+func main() {
 	log.Print("Starting mebender on port 8080")
 
-	http.HandleFunc("/cut", web.CutVideo)
+	http.HandleFunc("/cut", api.CutVideo)
+	http.HandleFunc("/gif", api.GifFromVideo)
+	http.HandleFunc("/sound", api.SoundFromVideo)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -1,6 +1,8 @@
 package model
 
-func ValidateCutVideoRequest (req CutVideoRequest) error {
+var REQUEST_TYPES = [...]string{CutVideo, GetAudio, GetVideo}
+
+func ValidateRequest(req Request, requestType string) error {
 	// Start Time only is valid
 
 	// validate start time is before end time

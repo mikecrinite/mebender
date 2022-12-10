@@ -100,7 +100,7 @@ func ExtractAudio(request model.Request) (string, string, string, error) {
 			} else {
 				log.Printf("Stream %d had no tags. It will be skipped", i)
 			}
-		} 
+		}
 	}
 
 	if audioStream == nil {

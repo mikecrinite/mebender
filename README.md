@@ -28,7 +28,7 @@ Feel free to submit any thoughts, questions, concerns, etc. via GitHub
 `make` is of course also not required. The `makefile` contains all the rules, which are basically just shell scripts. Running the individual commands in a terminal will accomplish the same thing
 
 ## Libraries
-* [go-ffprobe](gopkg.in/vansante/go-ffprobe.v2) - Small library for executing an ffprobe process on a given file and getting an easy to use struct representing the returned ffprobe data.
+* [go-ffprobe](https://gopkg.in/vansante/go-ffprobe.v2) - Small library for executing an ffprobe process on a given file and getting an easy to use struct representing the returned ffprobe data.
 
 ## Run
 * The simplest way to run the service for development purposes is of course:

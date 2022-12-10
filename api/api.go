@@ -82,7 +82,7 @@ func GifFromVideo(w http.ResponseWriter, r *http.Request) {
 }
 
 func SoundFromVideo(w http.ResponseWriter, r *http.Request) {
-		/*
+	/*
 		requestType := model.GetAudio
 			// Translate request body into internal struct
 			output, stdout, stderr, err := handleCutVideo(w, r, requestType)
@@ -90,7 +90,7 @@ func SoundFromVideo(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleCutVideo(w http.ResponseWriter, r *http.Request, requestType string) (string, string, string, error) {
-		// Translate request body into internal struct
+	// Translate request body into internal struct
 	request := model.Request{}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
@@ -137,7 +137,7 @@ func handleGifFromVideo(w http.ResponseWriter, r *http.Request, requestType stri
 		log.Printf("An error occurred while writing gif frames: %s", err)
 	}
 
-	// Merge frames using imagemagick 
+	// Merge frames using imagemagick
 	return service.FramesToGif(output, GIF_FRAME_RATE, util.OUTPUT_LOCATION, request)
 }
 

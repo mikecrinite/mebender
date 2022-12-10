@@ -29,7 +29,7 @@ func CutVideo(cutVideoRequest model.Request) (string, string, string, error) {
 	cmd.Stderr = &stderr
 	log.Printf("Running ffmpeg command: %s\n", cmd.String())
 	err = cmd.Run()
-	if err != nil{
+	if err != nil {
 		log.Printf("ffmpeg CutVideo task took %s\n", util.FormatDuration(time.Since(methodStart)))
 	}
 	return output, stdout.String(), stderr.String(), err

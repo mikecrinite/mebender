@@ -15,6 +15,7 @@ func main() {
 	http.HandleFunc("/cut", api.CutVideo)
 	http.HandleFunc("/gif", api.GifFromVideo)
 	http.HandleFunc("/sound", api.SoundFromVideo)
+	http.HandleFunc("/info", api.VideoInfo)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

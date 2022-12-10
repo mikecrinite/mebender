@@ -2,6 +2,8 @@ package service
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os/exec"
@@ -9,6 +11,8 @@ import (
 
 	"mebender/model"
 	"mebender/util"
+
+	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
 func CutVideo(cutVideoRequest model.Request) (string, string, string, error) {
@@ -64,6 +68,74 @@ func VideoToGifFrames(gifRequest model.Request, frameRate string) (string, error
 		// log.Println(stdout.String())
 		return output, nil
 	}
+}
+
+func ExtractAudio(request model.Request) (string, string, string, error) {
+	methodStart := time.Now()
+	fullVideoLocation := fmt.Sprintf("%s%s", util.INPUT_LOCATION, request.VideoLocation)
+
+	// ffmpeg -i <input> -map 0:a:0 output0.wav -map 0:a:1 output1.wav -map 0:a:2 output2.wav -map 0:a:3 output3.wav
+	// ffmpeg -i <input> -vn -acodec copy output-audio.aac
+	// ffmpeg -i <input>.mov <input>.mp3
+	probeData, err := ProbeVideo(fullVideoLocation)
+	if err != nil {
+		return "", "", "", err
+	}
+
+	var audioStream *ffprobe.Stream
+	streams := probeData.Streams
+	for i, s := range streams {
+		if s.CodecType == "audio" {
+			tagList := s.TagList
+			if tagList != nil {
+				language := tagList["language"]
+				if language != nil {
+					if language == "eng" {
+						log.Printf("Stream %d had an 'eng' language tag. This stream will be accepted\n", i)
+						audioStream = s
+					}
+				} else {
+					log.Printf("Stream %d had no 'language' tag. It will be skipped\n", i)
+				}
+			} else {
+				log.Printf("Stream %d had no tags. It will be skipped", i)
+			}
+		} 
+	}
+
+	if audioStream == nil {
+		log.Printf("Could not find an audio stream for video %s\n", request.VideoLocation)
+		return "", "", "", errors.New("no audio stream with english language tag")
+	}
+
+	streamIndex := audioStream.Index
+	audioOutputLocation := fmt.Sprintf("%s%d.wav", util.OUTPUT_LOCATION, time.Now().UnixNano())
+
+	// ffmpeg -i <input> -map 0:a:0 output0.wav
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd := exec.Command("ffmpeg", "-i", fullVideoLocation, "-map", fmt.Sprintf("0:%d", streamIndex), audioOutputLocation)
+
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	log.Printf("Extracting audio from video: %s\n", fullVideoLocation)
+	log.Printf("Running ffmpeg command: %s\n", cmd.String())
+	err = cmd.Run()
+	if err != nil {
+		log.Println(stderr.String())
+		return "", stdout.String(), stderr.String(), err
+	} else {
+		log.Println("Successfully created audio file in output directory")
+		log.Printf("ffmpeg ExtractAudio task took %s\n", util.FormatDuration(time.Since(methodStart)))
+		// log.Println(stdout.String())
+		return audioOutputLocation, stdout.String(), stderr.String(), nil
+	}
+}
+
+func ProbeVideo(videoLocation string) (*ffprobe.ProbeData, error) {
+	ctx, cancelFn := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelFn()
+	return ffprobe.ProbeURL(ctx, videoLocation)
 }
 
 func getTimes(cutVideoRequest model.Request) (time.Duration, time.Duration, error) {

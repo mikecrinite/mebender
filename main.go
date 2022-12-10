@@ -10,6 +10,7 @@ import (
 
 func main() {
 	log.Print("Starting mebender on port 8080")
+	log.SetFlags(log.Lshortfile)
 
 	http.HandleFunc("/cut", api.CutVideo)
 	http.HandleFunc("/gif", api.GifFromVideo)

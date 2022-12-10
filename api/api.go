@@ -6,9 +6,12 @@ import (
 	"log"
 	"mebender/model"
 	"mebender/service"
+	"mebender/util"
 	"net/http"
 	"time"
 )
+
+const GIF_FRAME_RATE = "10"
 
 func CutVideo(w http.ResponseWriter, r *http.Request) {
 	methodStart := time.Now()
@@ -17,7 +20,7 @@ func CutVideo(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		response := model.Response{}
 		output, stdout, stderr, err := handleCutVideo(w, r, model.CutVideo)
-		response.Duration = time.Since(methodStart)
+		response.Duration = util.FormatDuration(time.Since(methodStart))
 
 		// write response
 		if err != nil {
@@ -25,6 +28,10 @@ func CutVideo(w http.ResponseWriter, r *http.Request) {
 			response.Error = err
 			log.Println(stderr)
 			log.Println(err)
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
 		} else {
 			// Handle Success
 			response.Success = true
@@ -46,20 +53,24 @@ func GifFromVideo(w http.ResponseWriter, r *http.Request) {
 	// Cut the video into a smaller clip
 	if r.Method == "POST" {
 		response := model.Response{}
-		output, stdout, stderr, err := handleGifFromVideo(w, r, model.GetVideo)
-		response.Duration = time.Since(methodStart)
+		output, _, stderr, err := handleGifFromVideo(w, r, model.GetVideo)
+		response.Duration = util.FormatDuration(time.Since(methodStart))
 
 		// write response
 		if err != nil {
 			response.Success = false
 			response.Error = err
-			log.Println(stderr)
 			log.Println(err)
+			log.Println(stderr)
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
 		} else {
 			// Handle Success
 			response.Success = true
 			response.ClipLocation = output
-			log.Println(stdout)
+			//log.Println(stdout)
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
@@ -120,8 +131,14 @@ func handleGifFromVideo(w http.ResponseWriter, r *http.Request, requestType stri
 	// debug print request
 	fmt.Printf("%#v\n", request)
 
-	// Cut video down to clip
-	return service.VideoToGif(request)
+	// Create image frames from video using ffmpeg
+	output, err := service.VideoToGifFrames(request, GIF_FRAME_RATE)
+	if err != nil {
+		log.Printf("An error occurred while writing gif frames: %s", err)
+	}
+
+	// Merge frames using imagemagick 
+	return service.FramesToGif(output, GIF_FRAME_RATE, util.OUTPUT_LOCATION, request)
 }
 
 func handleFailure(err error, w http.ResponseWriter, request model.Request) {

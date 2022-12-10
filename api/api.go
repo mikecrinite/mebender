@@ -118,8 +118,8 @@ func SoundFromVideo(w http.ResponseWriter, r *http.Request) {
 func VideoInfo(w http.ResponseWriter, r *http.Request) {
 	methodStart := time.Now()
 
-	// Cut the video into a smaller clip
-	if r.Method == "POST" {
+	// Get ffProbe info
+	if r.Method == "GET" {
 		request := model.Request{}
 		_ = json.NewDecoder(r.Body).Decode(&request)
 		probeData, err := service.ProbeVideo(fmt.Sprintf("%s%s", util.INPUT_LOCATION, request.VideoLocation))

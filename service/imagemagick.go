@@ -20,7 +20,7 @@ func FramesToGif(framesDirectory string, frameRate string, outputDirectory strin
 		// the parent method will end its execution before this method even gets a chance to run, and consequently it will almost
 		// never execute
 		removeImageFramesDirectory(framesDirectory)
-	} 
+	}
 
 	return output, err
 }

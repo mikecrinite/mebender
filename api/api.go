@@ -115,7 +115,7 @@ func handleGifFromVideo(w http.ResponseWriter, r *http.Request, requestType stri
 	output, err := service.VideoToGifFrames(request, GIF_FRAME_RATE)
 	if err != nil {
 		log.Printf("An error occurred while writing gif frames: %s", err)
-	} 
+	}
 
 	// Merge frames using imagemagick
 	return service.FramesToGif(output, GIF_FRAME_RATE, util.OUTPUT_LOCATION, request)
@@ -143,7 +143,7 @@ func handleExtractAudio(w http.ResponseWriter, r *http.Request, requestType stri
 	return service.ExtractAudio(request)
 }
 
-func writeResponse(w http.ResponseWriter, r *http.Request, output string, err error, methodStart time.Time, probeData *ffprobe.ProbeData){
+func writeResponse(w http.ResponseWriter, r *http.Request, output string, err error, methodStart time.Time, probeData *ffprobe.ProbeData) {
 	response := model.Response{}
 	response.Duration = util.FormatDuration(time.Since(methodStart))
 
@@ -166,7 +166,7 @@ func writeResponse(w http.ResponseWriter, r *http.Request, output string, err er
 	if probeData != nil {
 		probeResponse := model.ProbeResponse{
 			Response: response,
-			Data: probeData,
+			Data:     probeData,
 		}
 		json.NewEncoder(w).Encode(probeResponse)
 	} else {

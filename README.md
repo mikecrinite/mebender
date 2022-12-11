@@ -116,4 +116,3 @@ Yes, audio is much quicker to extract. Still, 1+ s response time is not ideal
 - Two-stage Dockerfile 
 - Validate requests
 - Allow a full length video to be supplied to /cut and /gif as well as start and end times to trim them to a shorter clip
-- Clean up the api file to break some of the repeated code out into methods

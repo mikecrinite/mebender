@@ -1,7 +1,6 @@
 package service
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -15,37 +14,22 @@ import (
 	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
-func CutVideo(cutVideoRequest model.Request) (string, string, string, error) {
-	methodStart := time.Now()
+func CutVideo(cutVideoRequest model.Request) (string, error) {
 	start, end, err := getTimes(cutVideoRequest)
 	if err != nil {
 		//todo
 		log.Println(err)
 	}
 	output := util.GetOutputLocation(cutVideoRequest, false)
-
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
-
 	cmd := exec.Command("ffmpeg", "-ss", formatTime(start), "-to", formatTime(end), "-i", fmt.Sprintf("%s/%s", util.INPUT_LOCATION, cutVideoRequest.VideoLocation) /*"-c copy",*/, output)
+	err = RunCommand(cmd, "ffmpeg", "CutVideo")
 
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	log.Printf("Running ffmpeg command: %s\n", cmd.String())
-	err = cmd.Run()
-	if err != nil {
-		log.Printf("ffmpeg CutVideo task took %s\n", util.FormatDuration(time.Since(methodStart)))
-	}
-	return output, stdout.String(), stderr.String(), err
+	return output, err
 }
 
 func VideoToGifFrames(gifRequest model.Request, frameRate string) (string, error) {
-	methodStart := time.Now()
 	output := util.GetOutputLocation(gifRequest, true)
 	// TODO: cut video if necessary
-
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
 
 	// Have to create the directory beforehand or else ffmpeg will fail
 	err := util.MkdirIfNotExists(output)
@@ -53,25 +37,12 @@ func VideoToGifFrames(gifRequest model.Request, frameRate string) (string, error
 		return "", err
 	}
 	cmd := exec.Command("ffmpeg", "-i", fmt.Sprintf("%s%s", util.INPUT_LOCATION, gifRequest.VideoLocation), "-r", frameRate, "-vcodec", "png", fmt.Sprintf("%s/%s", output, "frame-%03d.png"))
+	err = RunCommand(cmd, "ffmpeg", "VideoToGifFrames")
 
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	log.Printf("Creating gif frames in output folder: %s\n", output)
-	log.Printf("Running ffmpeg command: %s\n", cmd.String())
-	err = cmd.Run()
-	if err != nil {
-		log.Println(stderr.String())
-		return "", err
-	} else {
-		log.Println("Successfully created gif frames in output folder")
-		log.Printf("ffmpeg VideoToGifFrames task took %s\n", util.FormatDuration(time.Since(methodStart)))
-		// log.Println(stdout.String())
-		return output, nil
-	}
+	return output, err
 }
 
-func ExtractAudio(request model.Request) (string, string, string, error) {
-	methodStart := time.Now()
+func ExtractAudio(request model.Request) (string, error) {
 	fullVideoLocation := fmt.Sprintf("%s%s", util.INPUT_LOCATION, request.VideoLocation)
 
 	// ffmpeg -i <input> -map 0:a:0 output0.wav -map 0:a:1 output1.wav -map 0:a:2 output2.wav -map 0:a:3 output3.wav
@@ -79,7 +50,7 @@ func ExtractAudio(request model.Request) (string, string, string, error) {
 	// ffmpeg -i <input>.mov <input>.mp3
 	probeData, err := ProbeVideo(fullVideoLocation)
 	if err != nil {
-		return "", "", "", err
+		return "", err
 	}
 
 	var audioStream *ffprobe.Stream
@@ -105,31 +76,16 @@ func ExtractAudio(request model.Request) (string, string, string, error) {
 
 	if audioStream == nil {
 		log.Printf("Could not find an audio stream for video %s\n", request.VideoLocation)
-		return "", "", "", errors.New("no audio stream with english language tag")
+		return "", errors.New("no audio stream with english language tag")
 	}
 
 	streamIndex := audioStream.Index
 	audioOutputLocation := fmt.Sprintf("%s%d.wav", util.OUTPUT_LOCATION, time.Now().UnixNano())
 
-	// ffmpeg -i <input> -map 0:a:0 output0.wav
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
 	cmd := exec.Command("ffmpeg", "-i", fullVideoLocation, "-map", fmt.Sprintf("0:%d", streamIndex), audioOutputLocation)
+	err = RunCommand(cmd, "ffmpeg", "ExtractAudio")
 
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	log.Printf("Extracting audio from video: %s\n", fullVideoLocation)
-	log.Printf("Running ffmpeg command: %s\n", cmd.String())
-	err = cmd.Run()
-	if err != nil {
-		log.Println(stderr.String())
-		return "", stdout.String(), stderr.String(), err
-	} else {
-		log.Println("Successfully created audio file in output directory")
-		log.Printf("ffmpeg ExtractAudio task took %s\n", util.FormatDuration(time.Since(methodStart)))
-		// log.Println(stdout.String())
-		return audioOutputLocation, stdout.String(), stderr.String(), nil
-	}
+	return audioOutputLocation, err
 }
 
 func ProbeVideo(videoLocation string) (*ffprobe.ProbeData, error) {

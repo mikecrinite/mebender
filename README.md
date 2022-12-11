@@ -84,7 +84,7 @@ Feel free to submit any thoughts, questions, concerns, etc. via GitHub
     "duration": "225.55 s"
 }
 ```
-Note: 225.55s is kind of a ridiculous amount of time to create a gif, but in somewhat of a defense, it's a 20s gif of 212 PNGs. No but really, this needs to be optimized
+Note: 225.55s is kind of a ridiculous amount of time to create a gif, but in somewhat of a defense, it's a 20s gif of 212 PNGs. No but really, this needs to be optimized. Of course, this is all on my personal MacBook Air, so it's possible that the computing limitations of the machine could be holding it back
 
 ### Create .gif
 * Supply the video location to extract the audio and create a wav file
@@ -116,3 +116,4 @@ Yes, audio is much quicker to extract. Still, 1+ s response time is not ideal
 - Two-stage Dockerfile 
 - Validate requests
 - Allow a full length video to be supplied to /cut and /gif as well as start and end times to trim them to a shorter clip
+- Clean up the api file to break some of the repeated code out into methods

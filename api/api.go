@@ -19,14 +19,13 @@ func CutVideo(w http.ResponseWriter, r *http.Request) {
 	// Cut the video into a smaller clip
 	if r.Method == "POST" {
 		response := model.Response{}
-		output, stdout, stderr, err := handleCutVideo(w, r, model.CutVideo)
+		output, err := handleCutVideo(w, r, model.CutVideo)
 		response.Duration = util.FormatDuration(time.Since(methodStart))
 
 		// write response
 		if err != nil {
 			response.Success = false
 			response.Error = err
-			log.Println(stderr)
 			log.Println(err)
 
 			w.Header().Set("Content-Type", "application/json")
@@ -36,8 +35,6 @@ func CutVideo(w http.ResponseWriter, r *http.Request) {
 			// Handle Success
 			response.Success = true
 			response.Location = output
-			log.Println(stdout)
-
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(response)
@@ -53,7 +50,7 @@ func GifFromVideo(w http.ResponseWriter, r *http.Request) {
 	// Cut the video into a smaller clip
 	if r.Method == "POST" {
 		response := model.Response{}
-		output, _, stderr, err := handleGifFromVideo(w, r, model.GetVideo)
+		output, err := handleGifFromVideo(w, r, model.GetVideo)
 		response.Duration = util.FormatDuration(time.Since(methodStart))
 
 		// write response
@@ -61,7 +58,6 @@ func GifFromVideo(w http.ResponseWriter, r *http.Request) {
 			response.Success = false
 			response.Error = err
 			log.Println(err)
-			log.Println(stderr)
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -70,8 +66,6 @@ func GifFromVideo(w http.ResponseWriter, r *http.Request) {
 			// Handle Success
 			response.Success = true
 			response.Location = output
-			//log.Println(stdout)
-
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(response)
@@ -87,14 +81,13 @@ func SoundFromVideo(w http.ResponseWriter, r *http.Request) {
 	// Cut the video into a smaller clip
 	if r.Method == "POST" {
 		response := model.Response{}
-		output, stdout, stderr, err := handleExtractAudio(w, r, model.GetAudio)
+		output, err := handleExtractAudio(w, r, model.GetAudio)
 		response.Duration = util.FormatDuration(time.Since(methodStart))
 
 		// write response
 		if err != nil {
 			response.Success = false
 			response.Error = err
-			log.Println(stderr)
 			log.Println(err)
 
 			w.Header().Set("Content-Type", "application/json")
@@ -104,8 +97,6 @@ func SoundFromVideo(w http.ResponseWriter, r *http.Request) {
 			// Handle Success
 			response.Success = true
 			response.Location = output
-			log.Println(stdout)
-
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(response)
@@ -150,7 +141,7 @@ func VideoInfo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleCutVideo(w http.ResponseWriter, r *http.Request, requestType string) (string, string, string, error) {
+func handleCutVideo(w http.ResponseWriter, r *http.Request, requestType string) (string, error) {
 	// Translate request body into internal struct
 	request := model.Request{}
 	err := json.NewDecoder(r.Body).Decode(&request)
@@ -158,7 +149,7 @@ func handleCutVideo(w http.ResponseWriter, r *http.Request, requestType string) 
 		// log.Printf("There was an error decoding the request body into the struct: " + r.Body)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Could not decode the request"))
-		return "", "", "", err
+		return "", err
 	}
 
 	// Validate request
@@ -168,20 +159,20 @@ func handleCutVideo(w http.ResponseWriter, r *http.Request, requestType string) 
 	}
 
 	// debug print request
-	fmt.Printf("%#v\n", request)
+	log.Printf("%#v\n", request)
 
 	// Cut video down to clip
 	return service.CutVideo(request)
 }
 
-func handleGifFromVideo(w http.ResponseWriter, r *http.Request, requestType string) (string, string, string, error) {
+func handleGifFromVideo(w http.ResponseWriter, r *http.Request, requestType string) (string, error) {
 	request := model.Request{}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		// log.Printf("There was an error decoding the request body into the struct: " + r.Body)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Could not decode the request"))
-		return "", "", "", err
+		return "", err
 	}
 	// Validate request
 	err = model.ValidateRequest(request, requestType)
@@ -190,26 +181,26 @@ func handleGifFromVideo(w http.ResponseWriter, r *http.Request, requestType stri
 	}
 
 	// debug print request
-	fmt.Printf("%#v\n", request)
+	log.Printf("%#v\n", request)
 
 	// Create image frames from video using ffmpeg
 	output, err := service.VideoToGifFrames(request, GIF_FRAME_RATE)
 	if err != nil {
 		log.Printf("An error occurred while writing gif frames: %s", err)
-	}
+	} 
 
 	// Merge frames using imagemagick
 	return service.FramesToGif(output, GIF_FRAME_RATE, util.OUTPUT_LOCATION, request)
 }
 
-func handleExtractAudio(w http.ResponseWriter, r *http.Request, requestType string) (string, string, string, error) {
+func handleExtractAudio(w http.ResponseWriter, r *http.Request, requestType string) (string, error) {
 	request := model.Request{}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		// log.Printf("There was an error decoding the request body into the struct: " + r.Body)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Could not decode the request"))
-		return "", "", "", err
+		return "", err
 	}
 	// Validate request
 	err = model.ValidateRequest(request, requestType)
@@ -218,12 +209,10 @@ func handleExtractAudio(w http.ResponseWriter, r *http.Request, requestType stri
 	}
 
 	// debug print request
-	fmt.Printf("%#v\n", request)
+	log.Printf("%#v\n", request)
 
-	// Merge frames using imagemagick
-	service.ExtractAudio(request)
-
-	return "", "", "", nil
+	// Extract audio with ffmpeg
+	return service.ExtractAudio(request)
 }
 
 func handleFailure(err error, w http.ResponseWriter, request model.Request) {

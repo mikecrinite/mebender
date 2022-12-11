@@ -9,6 +9,8 @@ import (
 	"mebender/util"
 	"net/http"
 	"time"
+
+	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
 const GIF_FRAME_RATE = "10"
@@ -18,27 +20,9 @@ func CutVideo(w http.ResponseWriter, r *http.Request) {
 
 	// Cut the video into a smaller clip
 	if r.Method == "POST" {
-		response := model.Response{}
 		output, err := handleCutVideo(w, r, model.CutVideo)
-		response.Duration = util.FormatDuration(time.Since(methodStart))
 
-		// write response
-		if err != nil {
-			response.Success = false
-			response.Error = err
-			log.Println(err)
-
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(response)
-		} else {
-			// Handle Success
-			response.Success = true
-			response.Location = output
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(response)
-		}
+		writeResponse(w, r, output, err, methodStart, nil)
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -49,27 +33,9 @@ func GifFromVideo(w http.ResponseWriter, r *http.Request) {
 
 	// Cut the video into a smaller clip
 	if r.Method == "POST" {
-		response := model.Response{}
 		output, err := handleGifFromVideo(w, r, model.GetVideo)
-		response.Duration = util.FormatDuration(time.Since(methodStart))
 
-		// write response
-		if err != nil {
-			response.Success = false
-			response.Error = err
-			log.Println(err)
-
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(response)
-		} else {
-			// Handle Success
-			response.Success = true
-			response.Location = output
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(response)
-		}
+		writeResponse(w, r, output, err, methodStart, nil)
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -80,27 +46,9 @@ func SoundFromVideo(w http.ResponseWriter, r *http.Request) {
 
 	// Cut the video into a smaller clip
 	if r.Method == "POST" {
-		response := model.Response{}
 		output, err := handleExtractAudio(w, r, model.GetAudio)
-		response.Duration = util.FormatDuration(time.Since(methodStart))
 
-		// write response
-		if err != nil {
-			response.Success = false
-			response.Error = err
-			log.Println(err)
-
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(response)
-		} else {
-			// Handle Success
-			response.Success = true
-			response.Location = output
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(response)
-		}
+		writeResponse(w, r, output, err, methodStart, nil)
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -115,27 +63,7 @@ func VideoInfo(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewDecoder(r.Body).Decode(&request)
 		probeData, err := service.ProbeVideo(fmt.Sprintf("%s%s", util.INPUT_LOCATION, request.VideoLocation))
 
-		response := model.ProbeResponse{}
-		response.Duration = util.FormatDuration(time.Since(methodStart))
-
-		// write response
-		if err != nil {
-			response.Success = false
-			response.Error = err
-			log.Println(err)
-
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(response)
-		} else {
-			// Handle Success
-			response.Success = true
-			response.Data = probeData
-
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(response)
-		}
+		writeResponse(w, r, "", err, methodStart, probeData)
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -213,6 +141,37 @@ func handleExtractAudio(w http.ResponseWriter, r *http.Request, requestType stri
 
 	// Extract audio with ffmpeg
 	return service.ExtractAudio(request)
+}
+
+func writeResponse(w http.ResponseWriter, r *http.Request, output string, err error, methodStart time.Time, probeData *ffprobe.ProbeData){
+	response := model.Response{}
+	response.Duration = util.FormatDuration(time.Since(methodStart))
+
+	// write response
+	if err != nil {
+		response.Success = false
+		response.Error = err
+		log.Println(err)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+	} else {
+		// Handle Success
+		response.Success = true
+		response.Location = output
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+	}
+
+	if probeData != nil {
+		probeResponse := model.ProbeResponse{
+			Response: response,
+			Data: probeData,
+		}
+		json.NewEncoder(w).Encode(probeResponse)
+	} else {
+		json.NewEncoder(w).Encode(response)
+	}
 }
 
 func handleFailure(err error, w http.ResponseWriter, request model.Request) {

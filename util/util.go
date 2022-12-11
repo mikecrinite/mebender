@@ -39,7 +39,7 @@ func GetOutputLocation(cutVideoRequest model.Request, isGif bool) string {
 		//return fmt.Sprintf("%s_clip_%d.%s", parts[0], time.Now().UnixNano(), "gif")
 		return fmt.Sprintf("%s%s_frames_%d", OUTPUT_LOCATION, parts[0], now)
 	} else {
-		return fmt.Sprintf("%s/%s_clip_%d.%s", OUTPUT_LOCATION, parts[0], now, parts[1])
+		return fmt.Sprintf("%s%s_clip_%d.%s", OUTPUT_LOCATION, parts[0], now, parts[1])
 	}
 }
 

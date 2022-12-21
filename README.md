@@ -1,5 +1,7 @@
 # Me, Bender
 
+    Wait... there on the screen. It's that guy you are!
+
 Make short video clips, turn videos to gifs, extract audio from videos, and more, by making API calls to me, Bender!
 
 This service is a WIP. I'm developing it for personal use for reasons including but not limited to:

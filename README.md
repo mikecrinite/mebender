@@ -112,7 +112,6 @@ Yes, audio is much quicker to extract. Still, 1+ s response time is not ideal
 ## TODO
 - Optimize ffmpeg and imagemagick (the latter especially). Creating the gif takes multiple minutes which is probably excessive
 - Pipe ffmpeg frames directly to imagemagick to reduce the need for saving them to the disk and deleting them afterwards
-- Remove frames directory when gif is successfully created (should be unnecessary if the above todo is completed first)
 - Support other language audio extraction?
 - Tests
 - Two-stage Dockerfile 

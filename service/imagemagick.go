@@ -17,9 +17,6 @@ func FramesToGif(framesDirectory string, frameRate string, outputDirectory strin
 	err := RunCommand(cmd, "imagemagick", "FramesToGif")
 
 	if err == nil {
-		// TODO: Make this a goroutine. The reason it isn't already is because if you just call `go removeImageFramesDirectory`
-		// the parent method will end its execution before this method even gets a chance to run, and consequently it will almost
-		// never execute
 		go removeDir(framesDirectory)
 	}
 

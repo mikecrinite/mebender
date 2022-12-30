@@ -20,7 +20,7 @@ func CutVideo(cutVideoRequest model.Request) (string, error) {
 		//todo
 		log.Println(err)
 	}
-	output := util.GetOutputLocation(cutVideoRequest, false)
+	output := util.GetOutputLocation(cutVideoRequest.VideoLocation, false, model.CutVideo)
 	cmd := exec.Command("ffmpeg", "-ss", formatTime(start), "-to", formatTime(end), "-i", fmt.Sprintf("%s/%s", util.INPUT_LOCATION, cutVideoRequest.VideoLocation) /*"-c copy",*/, output)
 	err = RunCommand(cmd, "ffmpeg", "CutVideo")
 
@@ -28,7 +28,7 @@ func CutVideo(cutVideoRequest model.Request) (string, error) {
 }
 
 func VideoToGifFrames(gifRequest model.Request, frameRate string) (string, error) {
-	output := util.GetOutputLocation(gifRequest, true)
+	output := util.GetOutputLocation(gifRequest.VideoLocation, true, model.GetFrames)
 	// TODO: cut video if necessary
 
 	// Have to create the directory beforehand or else ffmpeg will fail
@@ -92,6 +92,20 @@ func ProbeVideo(videoLocation string) (*ffprobe.ProbeData, error) {
 	ctx, cancelFn := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelFn()
 	return ffprobe.ProbeURL(ctx, videoLocation)
+}
+
+func PixelateVideo(videoLocation string) (string, error) {
+	// TODO: This doesn't currently work because to enable frei0r, we have to update the ffmpeg configuration, and to do that
+	// we have to recompile ffmpeg, and right now I don't feel like doing that
+	
+	// ffmpeg -i input -vf "frei0r=filter_name=pixeliz0r:filter_params=0.02|0.02" output
+	pixel_dimensions := "0.02"
+
+	output := util.GetOutputLocation(videoLocation, false, model.PixelateVideo)
+	cmd := exec.Command("ffmpeg", "-i", fmt.Sprintf("%s%s", util.INPUT_LOCATION, videoLocation), "-vf", fmt.Sprintf("\"frei0r=filter_name=pixeliz0r:filter_params=%s|%s\"", pixel_dimensions, pixel_dimensions), output)
+	err := RunCommand(cmd, "ffmpeg", "PixelateVideo")
+
+	return output, err
 }
 
 func getTimes(cutVideoRequest model.Request) (time.Duration, time.Duration, error) {

@@ -1,6 +1,6 @@
 package model
 
-var REQUEST_TYPES = [...]string{CutVideo, GetAudio, GetVideo}
+//var REQUEST_TYPES = [...]string{CutVideo, GetAudio, GetVideo}
 
 func ValidateRequest(req Request, requestType string) error {
 	// Start Time only is valid

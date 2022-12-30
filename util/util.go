@@ -31,15 +31,23 @@ func MkdirIfNotExists(dirName string) error {
 	return err
 }
 
-func GetOutputLocation(cutVideoRequest model.Request, isGif bool) string {
-	parts := strings.Split(cutVideoRequest.VideoLocation, ".")
+func GetOutputLocation(videoLocation string, isGif bool, requestType string) string {
+	parts := strings.Split(videoLocation, ".")
 	now := time.Now().UnixNano()
 
 	if isGif {
 		//return fmt.Sprintf("%s_clip_%d.%s", parts[0], time.Now().UnixNano(), "gif")
 		return fmt.Sprintf("%s%s_frames_%d", OUTPUT_LOCATION, parts[0], now)
 	} else {
-		return fmt.Sprintf("%s%s_clip_%d.%s", OUTPUT_LOCATION, parts[0], now, parts[1])
+		var file_identifier string
+		switch requestType {
+		case model.CutVideo:
+			file_identifier = "clip"
+		case model.PixelateVideo:
+			file_identifier = "pixelated"
+		}
+
+		return fmt.Sprintf("%s%s_%s_%d.%s", OUTPUT_LOCATION, parts[0], file_identifier, now, parts[1])
 	}
 }
 

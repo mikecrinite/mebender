@@ -33,7 +33,7 @@ func GifFromVideo(w http.ResponseWriter, r *http.Request) {
 
 	// Cut the video into a smaller clip
 	if r.Method == "POST" {
-		output, err := handleGifFromVideo(w, r, model.GetVideo)
+		output, err := handleGifFromVideo(w, r, model.GetFrames)
 
 		writeResponse(w, r, output, err, methodStart, nil)
 	} else {
@@ -64,6 +64,21 @@ func VideoInfo(w http.ResponseWriter, r *http.Request) {
 		probeData, err := service.ProbeVideo(fmt.Sprintf("%s%s", util.INPUT_LOCATION, request.VideoLocation))
 
 		writeResponse(w, r, "", err, methodStart, probeData)
+	} else {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
+}
+
+func PixelateVideo(w http.ResponseWriter, r *http.Request){
+	methodStart := time.Now()
+
+	// Pixelate video
+	if r.Method == "POST" {
+		request := model.Request{}
+		_ = json.NewDecoder(r.Body).Decode(&request)
+		output, err := service.PixelateVideo(request.VideoLocation)
+
+		writeResponse(w, r, output, err, methodStart, nil)
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}

@@ -13,4 +13,5 @@ type Request struct {
 	StartTime     *string
 	EndTime       *string
 	VideoLocation string
+	OutputFilename *string
 }

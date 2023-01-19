@@ -80,9 +80,25 @@ func ExtractAudio(request model.Request) (string, error) {
 	}
 
 	streamIndex := audioStream.Index
-	audioOutputLocation := fmt.Sprintf("%s%d.wav", util.OUTPUT_LOCATION, time.Now().UnixNano())
+	var audioOutputLocation string
+	if request.OutputFilename != nil {
+		audioOutputLocation = fmt.Sprintf("%s%d%s.wav", util.OUTPUT_LOCATION, time.Now().UnixNano(), *request.OutputFilename)
+	}else{
+		audioOutputLocation = fmt.Sprintf("%s%d.wav", util.OUTPUT_LOCATION, time.Now().UnixNano())
+	}
 
-	cmd := exec.Command("ffmpeg", "-i", fullVideoLocation, "-map", fmt.Sprintf("0:%d", streamIndex), audioOutputLocation)
+	var cmd *exec.Cmd
+	if hasStartAndEnd(request) {
+		start, end, err := getTimes(request)
+		if err != nil {
+			//todo
+			log.Println(err)
+		}
+
+		cmd = exec.Command("ffmpeg", "-ss", formatTime(start), "-to", formatTime(end), "-i", fullVideoLocation, "-map", fmt.Sprintf("0:%d", streamIndex), audioOutputLocation)
+	} else {
+		cmd = exec.Command("ffmpeg", "-i", fullVideoLocation, "-map", fmt.Sprintf("0:%d", streamIndex), audioOutputLocation)
+	}
 	err = RunCommand(cmd, "ffmpeg", "ExtractAudio")
 
 	return audioOutputLocation, err
@@ -127,4 +143,8 @@ func getTimes(cutVideoRequest model.Request) (time.Duration, time.Duration, erro
 
 func formatTime(duration time.Duration) string {
 	return fmt.Sprintf("%f", duration.Seconds())
+}
+
+func hasStartAndEnd(request model.Request) bool {
+	return request.StartTime != nil && request.EndTime != nil
 }

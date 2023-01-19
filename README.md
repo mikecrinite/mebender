@@ -88,26 +88,29 @@ Feel free to submit any thoughts, questions, concerns, etc. via GitHub
 ```
 Note: 225.55s is kind of a ridiculous amount of time to create a gif, but in somewhat of a defense, it's a 20s gif of 212 PNGs. No but really, this needs to be optimized. Of course, this is all on my personal MacBook Air, so it's possible that the computing limitations of the machine could be holding it back
 
-### Create .gif
+### Extract Sound
 * Supply the video location to extract the audio and create a wav file
 * Endpoint: `/sound`
 * Method: `POST`
 * Example request body:
 ```
 {
-    "VideoLocation": "sample_clip_1670533061723588900.mkv"
+    "StartTime": "13m34s",
+    "EndTime": "13m38s",
+    "VideoLocation": "Dragon Ball - S03E06.mkv",
+    "OutputFilename": "you_dont_scare_me"
 }
 ```
 * Example response body:
 ```
 {
-    "location": "",
+    "location": "/root/resources/output/1674108461352890900you_dont_scare_me.wav",
     "success": true,
     "error": null,
-    "duration": "1.07 s"
+    "duration": "0.29 s"
 }
 ```
-Yes, audio is much quicker to extract. Still, 1+ s response time is not ideal
+Yes, audio is much quicker to extract. 
 
 ## TODO
 - Optimize ffmpeg and imagemagick (the latter especially). Creating the gif takes multiple minutes which is probably excessive
@@ -116,4 +119,4 @@ Yes, audio is much quicker to extract. Still, 1+ s response time is not ideal
 - Tests
 - Two-stage Dockerfile 
 - Validate requests
-- Allow a full length video to be supplied to /cut and /gif as well as start and end times to trim them to a shorter clip
+- Allow a full length video to be supplied to /cut and /gif as well as start and end times to trim them to a shorter clip (/cut and /sound can use start/end times now. just /gif remains)

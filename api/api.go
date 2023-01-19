@@ -44,7 +44,6 @@ func GifFromVideo(w http.ResponseWriter, r *http.Request) {
 func SoundFromVideo(w http.ResponseWriter, r *http.Request) {
 	methodStart := time.Now()
 
-	// Cut the video into a smaller clip
 	if r.Method == "POST" {
 		output, err := handleExtractAudio(w, r, model.GetAudio)
 

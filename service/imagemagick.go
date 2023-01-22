@@ -11,7 +11,14 @@ import (
 )
 
 func FramesToGif(framesDirectory string, frameRate string, outputDirectory string, request model.Request) (string, error) {
-	output := fmt.Sprintf("%s%d.gif", util.OUTPUT_LOCATION, time.Now().UnixNano())
+	var outputFilename string
+	if request.OutputFilename != nil {
+		outputFilename = *request.OutputFilename
+	} else {
+		outputFilename = "animation"
+	}
+	
+	output := fmt.Sprintf("%s%d_%s.gif", util.OUTPUT_LOCATION, time.Now().UnixNano(), outputFilename)
 
 	cmd := exec.Command("convert", "-delay", frameRate, "-loop", "0", "-layers", "optimize", fmt.Sprintf("%s/%s", framesDirectory, "*.png"), output)
 	err := RunCommand(cmd, "imagemagick", "FramesToGif")

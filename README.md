@@ -74,19 +74,22 @@ Feel free to submit any thoughts, questions, concerns, etc. via GitHub
 * Example request body:
 ```
 {
-    "VideoLocation": "sample_clip_1670533061723588900.mkv"
+    "StartTime": "19m48s",
+    "EndTime": "19m57s",
+    "VideoLocation": "Dragon Ball - S05E24.mkv",
+    "OutputFilename": "he_thinks_he's_funny"
 }
 ```
 * Example response body:
 ```
 {
-    "location": "/root/resources/output/1670649210303948800.gif",
+    "location": "/root/resources/output/1674364283408007700_he_thinks_he's_funny.gif",
     "success": true,
     "error": null,
-    "duration": "225.55 s"
+    "duration": "68.40 s"
 }
 ```
-Note: 225.55s is kind of a ridiculous amount of time to create a gif, but in somewhat of a defense, it's a 20s gif of 212 PNGs. No but really, this needs to be optimized. Of course, this is all on my personal MacBook Air, so it's possible that the computing limitations of the machine could be holding it back
+Note: This seems like a long time to make a gif, although I don't have a frame of reference as this is the only way I've ever personally done it
 
 ### Extract Sound
 * Supply the video location to extract the audio and create a wav file
@@ -113,10 +116,9 @@ Note: 225.55s is kind of a ridiculous amount of time to create a gif, but in som
 Yes, audio is much quicker to extract. 
 
 ## TODO
-- Optimize ffmpeg and imagemagick (the latter especially). Creating the gif takes multiple minutes which is probably excessive
+- Optimize ffmpeg and imagemagick (the latter especially). Creating the gif takes multiple minutes sometimes which is probably excessive
 - Pipe ffmpeg frames directly to imagemagick to reduce the need for saving them to the disk and deleting them afterwards
 - Support other language audio extraction?
 - Tests
 - Two-stage Dockerfile 
 - Validate requests
-- Allow a full length video to be supplied to /cut and /gif as well as start and end times to trim them to a shorter clip (/cut and /sound can use start/end times now. just /gif remains)

@@ -29,14 +29,24 @@ func CutVideo(cutVideoRequest model.Request) (string, error) {
 
 func VideoToGifFrames(gifRequest model.Request, frameRate string) (string, error) {
 	output := util.GetOutputLocation(gifRequest.VideoLocation, true, model.GetFrames)
-	// TODO: cut video if necessary
 
 	// Have to create the directory beforehand or else ffmpeg will fail
 	err := util.MkdirIfNotExists(output)
 	if err != nil {
 		return "", err
 	}
-	cmd := exec.Command("ffmpeg", "-i", fmt.Sprintf("%s%s", util.INPUT_LOCATION, gifRequest.VideoLocation), "-r", frameRate, "-vcodec", "png", fmt.Sprintf("%s/%s", output, "frame-%03d.png"))
+
+	var cmd *exec.Cmd
+	if hasStartAndEnd(gifRequest) {
+		start, end, err := getTimes(gifRequest)
+		if err != nil {
+			//todo
+			log.Println(err)
+		}
+		cmd = exec.Command("ffmpeg", "-ss", formatTime(start), "-to", formatTime(end), "-i", fmt.Sprintf("%s%s", util.INPUT_LOCATION, gifRequest.VideoLocation), "-r", frameRate, "-vcodec", "png", fmt.Sprintf("%s/%s", output, "frame-%03d.png"))
+	} else {
+		cmd = exec.Command("ffmpeg", "-i", fmt.Sprintf("%s%s", util.INPUT_LOCATION, gifRequest.VideoLocation), "-r", frameRate, "-vcodec", "png", fmt.Sprintf("%s/%s", output, "frame-%03d.png"))
+	}
 	err = RunCommand(cmd, "ffmpeg", "VideoToGifFrames")
 
 	return output, err
@@ -45,9 +55,6 @@ func VideoToGifFrames(gifRequest model.Request, frameRate string) (string, error
 func ExtractAudio(request model.Request) (string, error) {
 	fullVideoLocation := fmt.Sprintf("%s%s", util.INPUT_LOCATION, request.VideoLocation)
 
-	// ffmpeg -i <input> -map 0:a:0 output0.wav -map 0:a:1 output1.wav -map 0:a:2 output2.wav -map 0:a:3 output3.wav
-	// ffmpeg -i <input> -vn -acodec copy output-audio.aac
-	// ffmpeg -i <input>.mov <input>.mp3
 	probeData, err := ProbeVideo(fullVideoLocation)
 	if err != nil {
 		return "", err
@@ -82,9 +89,9 @@ func ExtractAudio(request model.Request) (string, error) {
 	streamIndex := audioStream.Index
 	var audioOutputLocation string
 	if request.OutputFilename != nil {
-		audioOutputLocation = fmt.Sprintf("%s%d%s.wav", util.OUTPUT_LOCATION, time.Now().UnixNano(), *request.OutputFilename)
+		audioOutputLocation = fmt.Sprintf("%s%d_%s.wav", util.OUTPUT_LOCATION, time.Now().UnixNano(), *request.OutputFilename)
 	}else{
-		audioOutputLocation = fmt.Sprintf("%s%d.wav", util.OUTPUT_LOCATION, time.Now().UnixNano())
+		audioOutputLocation = fmt.Sprintf("%s%d_sound.wav", util.OUTPUT_LOCATION, time.Now().UnixNano())
 	}
 
 	var cmd *exec.Cmd

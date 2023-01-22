@@ -52,20 +52,21 @@ Feel free to submit any thoughts, questions, concerns, etc. via GitHub
 * Example request body:
 ```
 {
-    "StartTime": "19m46s",
-    "EndTime": "20m7s",
-    "VideoLocation": "sample.mkv"
-}   
+    "StartTime": "5m55s",
+    "EndTime": "6m7s",
+    "VideoLocation": "Dragon Ball Z Kai - 56 - I Will Defeat Frieza! Another Super Saiyan!.mkv"
+} 
 ```
 * Example response body:
 ```
 {
-    "location": "/root/resources/output/sample_clip_1670621753960165200.mkv",
+    "location": "/root/resources/output/1674365770809476600_DragonBallZKai-56-IW_clip.mkv",
     "success": true,
     "error": null,
-    "duration": "15.50 s"
+    "duration": "69.12 s"
 }
 ```
+Nice. We also (a) prefix each file with a timestamp so each new file will be last in the folder and you don't have to search for it, and (b) shorten the filenames to 20 non-whitespace characters because long filenames are annoying and they should be unique because of timestamp anyway 
 
 ### Create .gif
 * Supply the video location to extract the frames and create a gif

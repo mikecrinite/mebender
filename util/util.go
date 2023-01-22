@@ -35,6 +35,15 @@ func GetOutputLocation(videoLocation string, isGif bool, requestType string) str
 	parts := strings.Split(videoLocation, ".")
 	now := time.Now().UnixNano()
 
+	// shorten filename to 20 characters... filenames can get really long
+	filename := strings.ReplaceAll(parts[0], " ", "")
+	
+	if len(filename) >= 20 {
+		filename = filename[0:20]
+	}
+
+	parts[0] = filename
+
 	if isGif {
 		//return fmt.Sprintf("%s_clip_%d.%s", parts[0], time.Now().UnixNano(), "gif")
 		return fmt.Sprintf("%s%s_frames_%d", OUTPUT_LOCATION, parts[0], now)
@@ -47,7 +56,7 @@ func GetOutputLocation(videoLocation string, isGif bool, requestType string) str
 			file_identifier = "pixelated"
 		}
 
-		return fmt.Sprintf("%s%s_%s_%d.%s", OUTPUT_LOCATION, parts[0], file_identifier, now, parts[1])
+		return fmt.Sprintf("%s%d_%s_%s.%s", OUTPUT_LOCATION, now, parts[0], file_identifier, parts[1])
 	}
 }
 

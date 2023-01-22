@@ -66,7 +66,7 @@ Feel free to submit any thoughts, questions, concerns, etc. via GitHub
     "duration": "69.12 s"
 }
 ```
-Nice. We also (a) prefix each file with a timestamp so each new file will be last in the folder and you don't have to search for it, and (b) shorten the filenames to 20 non-whitespace characters because long filenames are annoying and they should be unique because of timestamp anyway 
+Nice. We also (a) prefix each file with a timestamp so each new file will be last in the folder and you don't have to search for it, and (b) shorten the filenames to 20 non-whitespace characters when outputFilename is not specified because long filenames are annoying and they should be unique because of timestamp anyway
 
 ### Create .gif
 * Supply the video location to extract the frames and create a gif

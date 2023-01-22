@@ -31,18 +31,22 @@ func MkdirIfNotExists(dirName string) error {
 	return err
 }
 
-func GetOutputLocation(videoLocation string, isGif bool, requestType string) string {
+func GetOutputLocation(videoLocation string, isGif bool, requestType string, outputFilename string) string {
 	parts := strings.Split(videoLocation, ".")
 	now := time.Now().UnixNano()
 
 	// shorten filename to 20 characters... filenames can get really long
-	filename := strings.ReplaceAll(parts[0], " ", "")
+	if outputFilename == "" {
+		filename := strings.ReplaceAll(parts[0], " ", "")
 	
-	if len(filename) >= 20 {
-		filename = filename[0:20]
+		if len(filename) >= 20 {
+			filename = filename[0:20]
+		}
+	
+		parts[0] = filename
+	} else {
+		parts[0] = outputFilename
 	}
-
-	parts[0] = filename
 
 	if isGif {
 		//return fmt.Sprintf("%s_clip_%d.%s", parts[0], time.Now().UnixNano(), "gif")

@@ -20,7 +20,7 @@ func CutVideo(cutVideoRequest model.Request) (string, error) {
 		//todo
 		log.Println(err)
 	}
-	output := util.GetOutputLocation(cutVideoRequest.VideoLocation, false, model.CutVideo)
+	output := util.GetOutputLocation(cutVideoRequest.VideoLocation, false, model.CutVideo, *cutVideoRequest.OutputFilename)
 	cmd := exec.Command("ffmpeg", "-ss", formatTime(start), "-to", formatTime(end), "-i", fmt.Sprintf("%s/%s", util.INPUT_LOCATION, cutVideoRequest.VideoLocation) /*"-c copy",*/, output)
 	err = RunCommand(cmd, "ffmpeg", "CutVideo")
 
@@ -28,7 +28,7 @@ func CutVideo(cutVideoRequest model.Request) (string, error) {
 }
 
 func VideoToGifFrames(gifRequest model.Request, frameRate string) (string, error) {
-	output := util.GetOutputLocation(gifRequest.VideoLocation, true, model.GetFrames)
+	output := util.GetOutputLocation(gifRequest.VideoLocation, true, model.GetFrames, *gifRequest.OutputFilename)
 
 	// Have to create the directory beforehand or else ffmpeg will fail
 	err := util.MkdirIfNotExists(output)
@@ -124,7 +124,7 @@ func PixelateVideo(videoLocation string) (string, error) {
 	// ffmpeg -i input -vf "frei0r=filter_name=pixeliz0r:filter_params=0.02|0.02" output
 	pixel_dimensions := "0.02"
 
-	output := util.GetOutputLocation(videoLocation, false, model.PixelateVideo)
+	output := util.GetOutputLocation(videoLocation, false, model.PixelateVideo, "") //, cutVideoRequest.OutputFilename)
 	cmd := exec.Command("ffmpeg", "-i", fmt.Sprintf("%s%s", util.INPUT_LOCATION, videoLocation), "-vf", fmt.Sprintf("\"frei0r=filter_name=pixeliz0r:filter_params=%s|%s\"", pixel_dimensions, pixel_dimensions), output)
 	err := RunCommand(cmd, "ffmpeg", "PixelateVideo")
 

@@ -1,4 +1,3 @@
-version: "3.4"
 services:
   mebender:
     container_name: mebender

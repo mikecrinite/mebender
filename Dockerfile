@@ -21,7 +21,7 @@ RUN go build -o ./mebender
 
 # For using a custom port
 ARG PORT
-ENV PORT $PORT
+ENV PORT=$PORT
 EXPOSE ${PORT?8080}
 
 CMD [ "./mebender" ]

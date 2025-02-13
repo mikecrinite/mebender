@@ -29,6 +29,8 @@ Feel free to submit any thoughts, questions, concerns, etc. via GitHub
 
 `make` is of course also not required. The `makefile` contains all the rules, which are basically just shell scripts. Running the individual commands in a terminal will accomplish the same thing
 
+You will also need to supply a `.env` file in the project root (see `.env.sample` for the properties you'll need)
+
 ## Libraries
 * [go-ffprobe](https://gopkg.in/vansante/go-ffprobe.v2) - Small library for executing an ffprobe process on a given file and getting an easy to use struct representing the returned ffprobe data.
 
@@ -117,7 +119,7 @@ Note: This seems like a long time to make a gif, although I don't have a frame o
 Yes, audio is much quicker to extract. 
 
 ## TODO
-- Optimize ffmpeg and imagemagick (the latter especially). Creating the gif takes multiple minutes sometimes which is probably excessive
+- Optimize ffmpeg and imagemagick (the latter especially). Creating the gif takes multiple minutes sometimes which is probably excessive (although sources online are saying that's just the price you pay so idk)
 - Pipe ffmpeg frames directly to imagemagick to reduce the need for saving them to the disk and deleting them afterwards
 - Support other language audio extraction?
 - Tests

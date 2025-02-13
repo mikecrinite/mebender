@@ -7,10 +7,12 @@ services:
       - AUTH_USER=${AUTH_USER}
       - AUTH_PASS=${AUTH_PASS}
       - PORT=${PORT}
+      - MOUNT_HOST_DIR=${MOUNT_HOST_DIR}
+      - MOUNT_TARGET_DIR=${MOUNT_TARGET_DIR}
     ports:
       - ${PORT}:${PORT}
     volumes:
-      - ./resources/:/root/resources/ 
+      - ${MOUNT_HOST_DIR}:${MOUNT_TARGET_DIR}
 
     
     
